@@ -3,6 +3,7 @@
 import sys
 import json
 import requests
+import csv
 from datetime import datetime
 from websocket import create_connection
 
@@ -85,6 +86,27 @@ def order_book(ordertype, price_range=0):
             print('Combined value of: {:,}'.format(int(book_usd_value)), ' USD')
             sys.exit(1)
 
+def trade_logger(): # logs all trades in CSV format
+    ws = create_connection("wss://api2.bitfinex.com:3000/ws")
+    ws.send(json.dumps({
+        "event": "subscribe",
+        "channel": "trades",
+        "pair": "BTCUSD",
+        "prec": "P0"
+    }))
+
+    while True:
+        result = ws.recv()
+        result = json.loads(result)
+        try:
+            if result[1] == 'tu':
+                print('.', end='')
+                sys.stdout.flush()
+                log = open('bitfinex_tradelog.csv', 'a')
+                writer = csv.writer(log, dialect='excel')
+                writer.writerow(result)
+        except:
+            pass
 
 def main():  # main function
     if len(sys.argv) > 1:
@@ -97,6 +119,8 @@ def main():  # main function
                 trades(0)
         elif sys.argv[1] == '-ticker':
             ticker()
+        elif sys.argv[1] == '-log':
+            trade_logger()
         elif sys.argv[1] == '-orderbook':
             if len(sys.argv) > 2:
                 if sys.argv[2] in ('asks', 'bids'):
