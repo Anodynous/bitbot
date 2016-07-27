@@ -86,7 +86,16 @@ def order_book(ordertype, price_range=0):
             print('Combined value of: {:,}'.format(int(book_usd_value)), ' USD')
             sys.exit(1)
 
+def trade_logger_filechk(): #determines which file to append newly logged trades to and linecount of it
+    fname = 'bitfinex_tradelog.csv'
+    with open(fname) as f:
+        for i, l in enumerate(f):
+            pass
+    return i + 1
+
 def trade_logger(): # logs all trades in CSV format
+    trade_count = trade_logger_filechk()
+    print(trade_count)
     ws = create_connection("wss://api2.bitfinex.com:3000/ws")
     ws.send(json.dumps({
         "event": "subscribe",
@@ -100,11 +109,12 @@ def trade_logger(): # logs all trades in CSV format
         result = json.loads(result)
         try:
             if result[1] == 'tu':
-                print('.', end='')
-                sys.stdout.flush()
                 log = open('bitfinex_tradelog.csv', 'a')
                 writer = csv.writer(log, dialect='excel')
                 writer.writerow(result)
+                print('.', end='')
+                sys.stdout.flush()
+                trade_count += trade_count
         except:
             pass
 
