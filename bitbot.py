@@ -8,8 +8,6 @@ import csv
 from datetime import datetime
 from websocket import create_connection
 
-lastprice = 0
-
 
 def trades(minsize):  # prints trades equal to or larger than 'minsize'
     ws = create_connection("wss://api2.bitfinex.com:3000/ws")
@@ -37,6 +35,7 @@ def trades(minsize):  # prints trades equal to or larger than 'minsize'
 
 
 def ticker():  # prints ticker feed
+    last_price = 0
     ws = create_connection("wss://api2.bitfinex.com:3000/ws")
     ws.send(json.dumps({
         "event": "subscribe",
@@ -74,7 +73,8 @@ def order_book(ordertype, price_range=0):
     for i in range(0, 5000):
         try:
             usd_price = parsed_json[ordertype][i]['price']
-            if (price_range == 0) or (last_price - float(price_range)) <= float(usd_price) <= (last_price + float(price_range)):
+            if (price_range == 0) or (last_price - float(price_range)) <= float(usd_price) <= (
+                        last_price + float(price_range)):
                 n += 1
                 timestamp = datetime.fromtimestamp(int(float(parsed_json[ordertype][i]['timestamp'])))
                 btc_amount = parsed_json[ordertype][i]['amount']
@@ -87,27 +87,31 @@ def order_book(ordertype, price_range=0):
             print('Combined value of: {:,}'.format(int(book_usd_value)), ' USD')
             sys.exit(1)
 
-def trade_logger_filechk(): # picks logfile to continue from and gets linecount
-        logfile = glob.glob('bitfinex_tradelog*')
-        if len(logfile) < 1:
-            open('bitfinex_tradelog1.csv', 'a').close() #creates first logfile if none are present
-            last_logfile = 'bitfinex_tradelog1.csv'
-        else:
-            try:
-                try:
-                    last_logfile = max(glob.glob('bitfinex_tradelog???.csv'))
-                except ValueError:
-                    last_logfile = max(glob.glob('bitfinex_tradelog??.csv'))
-            except ValueError:
-                last_logfile = max(glob.glob('bitfinex_tradelog?.csv'))
-        with open(last_logfile) as f:
-            for i, l in enumerate(f):
-                pass
-        try: i += 1
-        except NameError: i = 0
-        return(last_logfile, i)
 
-def trade_logger(): # logs all trades in CSV format
+def trade_logger_filechk():  # picks logfile to continue from and gets linecount
+    logfile = glob.glob('bitfinex_tradelog*')
+    if len(logfile) < 1:
+        open('bitfinex_tradelog1.csv', 'a').close()  # creates first logfile if none are present
+        last_logfile = 'bitfinex_tradelog1.csv'
+    else:
+        try:
+            try:
+                last_logfile = max(glob.glob('bitfinex_tradelog???.csv'))
+            except ValueError:
+                last_logfile = max(glob.glob('bitfinex_tradelog??.csv'))
+        except ValueError:
+            last_logfile = max(glob.glob('bitfinex_tradelog?.csv'))
+    with open(last_logfile) as f:
+        for i, l in enumerate(f):
+            pass
+    try:
+        i += 1
+    except NameError:
+        i = 0
+    return last_logfile, i
+
+
+def trade_logger():  # logs all trades in CSV format
     last_logfile, trade_count = trade_logger_filechk()
     print(last_logfile, trade_count)
     ws = create_connection("wss://api2.bitfinex.com:3000/ws")
@@ -124,7 +128,7 @@ def trade_logger(): # logs all trades in CSV format
         try:
             if result[1] == 'tu':
                 if trade_count >= 5000:
-                    last_logfile = 'bitfinex_tradelog'+str(int(last_logfile[17:][:-4])+1)+'.csv'
+                    last_logfile = 'bitfinex_tradelog' + str(int(last_logfile[17:][:-4]) + 1) + '.csv'
                     trade_count = 0
                 trade_count += 1
                 log = open(last_logfile, 'a')
@@ -134,6 +138,7 @@ def trade_logger(): # logs all trades in CSV format
                 sys.stdout.flush()
         except:
             pass
+
 
 def main():  # main function
     if len(sys.argv) > 1:
