@@ -8,6 +8,8 @@ import csv
 from datetime import datetime
 from websocket import create_connection
 
+if sys.version_info[0] < 3:
+        raise "Requires Python 3+"
 
 def trades(minsize):  # prints trades equal to or larger than 'minsize'
     ws = create_connection("wss://api2.bitfinex.com:3000/ws")
@@ -63,7 +65,7 @@ def current_price():  # returns current BTC price
     return last_price
 
 
-def order_book(ordertype, price_range=0):
+def order_book(ordertype, price_range=0):  # prints order book data
     if price_range != 0:
         last_price = float(current_price())
     r = requests.get('https://api.bitfinex.com/v1/book/BTCUSD')
@@ -121,7 +123,6 @@ def trade_logger():  # logs all trades in CSV format
         "pair": "BTCUSD",
         "prec": "P0"
     }))
-
     while True:
         result = ws.recv()
         result = json.loads(result)
