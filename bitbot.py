@@ -2,6 +2,7 @@
 
 import sys
 import json
+import glob
 import requests
 import csv
 from datetime import datetime
@@ -86,16 +87,29 @@ def order_book(ordertype, price_range=0):
             print('Combined value of: {:,}'.format(int(book_usd_value)), ' USD')
             sys.exit(1)
 
-def trade_logger_filechk(): #determines which file to append newly logged trades to and linecount of it
-    fname = 'bitfinex_tradelog.csv'
-    with open(fname) as f:
-        for i, l in enumerate(f):
-            pass
-    return i + 1
+def trade_logger_filechk(): # picks logfile to continue from and gets linecount
+        logfile = glob.glob('bitfinex_tradelog*')
+        if len(logfile) < 1:
+            open('bitfinex_tradelog1.csv', 'a').close() #creates first logfile if none are present
+            last_logfile = 'bitfinex_tradelog1.csv'
+        else:
+            try:
+                try:
+                    last_logfile = max(glob.glob('bitfinex_tradelog???.csv'))
+                except ValueError:
+                    last_logfile = max(glob.glob('bitfinex_tradelog??.csv'))
+            except ValueError:
+                last_logfile = max(glob.glob('bitfinex_tradelog?.csv'))
+        with open(last_logfile) as f:
+            for i, l in enumerate(f):
+                pass
+        try: i += 1
+        except NameError: i = 0
+        return(last_logfile, i)
 
 def trade_logger(): # logs all trades in CSV format
-    trade_count = trade_logger_filechk()
-    print(trade_count)
+    last_logfile, trade_count = trade_logger_filechk()
+    print(last_logfile, trade_count)
     ws = create_connection("wss://api2.bitfinex.com:3000/ws")
     ws.send(json.dumps({
         "event": "subscribe",
@@ -109,12 +123,15 @@ def trade_logger(): # logs all trades in CSV format
         result = json.loads(result)
         try:
             if result[1] == 'tu':
-                log = open('bitfinex_tradelog.csv', 'a')
+                if trade_count >= 5000:
+                    last_logfile = 'bitfinex_tradelog'+str(int(last_logfile[17:][:-4])+1)+'.csv'
+                    trade_count = 0
+                trade_count += 1
+                log = open(last_logfile, 'a')
                 writer = csv.writer(log, dialect='excel')
                 writer.writerow(result)
                 print('.', end='')
                 sys.stdout.flush()
-                trade_count += trade_count
         except:
             pass
 
