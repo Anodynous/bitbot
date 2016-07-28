@@ -126,20 +126,25 @@ def trade_logger():  # logs all trades in CSV format
     while True:
         result = ws.recv()
         result = json.loads(result)
-        try:
-            if result[1] == 'tu':
-                if trade_count >= 5000:
-                    last_logfile = 'bitfinex_tradelog' + str(int(last_logfile[17:][:-4]) + 1) + '.csv'
-                    trade_count = 0
-                trade_count += 1
+        #if (type(result) == list) and (result[1] == 'hb'):
+        if (type(result) == list) and (result[1] == 'tu'):
+            try:
+                if result[1] == 'tu':
+                    if trade_count >= 5000:
+                        last_logfile = 'bitfinex_tradelog' + str(int(last_logfile[17:][:-4]) + 1) + '.csv'
+                        trade_count = 0
+                    trade_count += 1
+                    log = open(last_logfile, 'a')
+                    writer = csv.writer(log, dialect='excel')
+                    writer.writerow(result)
+                    print('.', end='')
+                    sys.stdout.flush()
+            except Exception as e:
                 log = open(last_logfile, 'a')
                 writer = csv.writer(log, dialect='excel')
-                writer.writerow(result)
-                print('.', end='')
-                sys.stdout.flush()
-        except:
-            pass
-
+                writer.writerow(e)
+                print(e)
+                pass
 
 def main():  # main function
     if len(sys.argv) > 1:
