@@ -7,19 +7,34 @@ import requests
 import csv
 from datetime import datetime
 from websocket import create_connection
+from operator import itemgetter
 
 if sys.version_info[0] < 3:
         raise "Requires Python 3+"
 
-def trades(minsize):  # prints trades equal to or larger than 'minsize'
-    ws = create_connection("wss://api2.bitfinex.com:3000/ws")
-    ws.send(json.dumps({
-        "event": "subscribe",
-        "channel": "trades",
-        "pair": "BTCUSD",
-        "prec": "P0"
-    }))
 
+def bitfinexConnect(channel, precission, orderbook=25):
+    ws = create_connection("wss://api2.bitfinex.com:3000/ws")
+    if orderbook == 0:
+        ws.send(json.dumps({
+            "event": "subscribe",
+            "channel": channel,
+            "pair": "BTCUSD",
+            "prec": precission
+        }))
+    elif orderbook != 0:
+        ws.send(json.dumps({
+            "event": "subscribe",
+            "channel": channel,
+            "pair": "BTCUSD",
+            "prec": precission,
+            "len": orderbook
+        }))
+    return(ws)
+
+
+def trades(minsize):  # prints trades equal to or larger than 'minsize'
+    ws = bitfinexConnect('trades', 'P0')
     while True:
         result = ws.recv()
         result = json.loads(result)
@@ -38,14 +53,7 @@ def trades(minsize):  # prints trades equal to or larger than 'minsize'
 
 def ticker():  # prints ticker feed
     last_price = 0
-    ws = create_connection("wss://api2.bitfinex.com:3000/ws")
-    ws.send(json.dumps({
-        "event": "subscribe",
-        "channel": "ticker",
-        "pair": "BTCUSD",
-        "prec": "P0"
-    }))
-
+    ws = bitfinexConnect('ticker', 'P0')
     while True:
         result = ws.recv()
         result = json.loads(result)
@@ -56,7 +64,7 @@ def ticker():  # prints ticker feed
                     last_price = result[7]
         except:
             continue
-
+    ws.close()
 
 def current_price():  # returns current BTC price
     r = requests.get('https://api.bitfinex.com/v1/pubticker/BTCUSD')
@@ -90,6 +98,31 @@ def order_book(ordertype, price_range=0):  # prints order book data
             sys.exit(1)
 
 
+def raw_order_book():
+    orderbook_length = 25
+    ws = bitfinexConnect('book', 'P3', orderbook_length) #number of decimal places: P0=2, P1=1, P2=0 ie. $1, P3=-1 ie. $10
+    while True:
+        result = ws.recv()
+        result = json.loads(result)
+        if type(result) == list:
+            if len(result) == 4 and result[2] != 0:
+                for n in range(0, orderbook_length*2):
+                    if result[1] == order_book[n][0]:
+                        if result[3] != order_book[n][2]:
+                            order_book[n] = [result[1], result[2], result[3]]
+                            print('MATCH: , [{0}, {1}, {2}] :: {3}'.format(result[1], result[2], result[3], order_book[n]))
+                            break
+                        if result[3] == order_book[n][2]:
+                            break
+                        elif n == orderbook_length-1:
+                            new_bookpoint = [result[1], result[2], result[3]]
+                            order_book.append(new_bookpoint)
+                            print('ADDED: , [{0}, {1}, {2}] :: {3}'.format(result[1], result[2], result[3], order_book[n]))
+            elif len(result) == 2 and result[1] != 'hb':
+                order_book = result[1]
+                order_book = sorted(order_book, key = itemgetter(0), reverse = True)
+    ws.close()
+
 def trade_logger_filechk():  # picks logfile to continue from and gets linecount
     logfile = glob.glob('bitfinex_tradelog*')
     if len(logfile) < 1:
@@ -116,13 +149,7 @@ def trade_logger_filechk():  # picks logfile to continue from and gets linecount
 def trade_logger():  # logs all trades in CSV format
     last_logfile, trade_count = trade_logger_filechk()
     print(last_logfile, trade_count)
-    ws = create_connection("wss://api2.bitfinex.com:3000/ws")
-    ws.send(json.dumps({
-        "event": "subscribe",
-        "channel": "trades",
-        "pair": "BTCUSD",
-        "prec": "P0"
-    }))
+    ws = bitfinexConnect('trades', 'P0')
     while True:
         result = ws.recv()
         result = json.loads(result)
@@ -145,6 +172,7 @@ def trade_logger():  # logs all trades in CSV format
                 writer.writerow(e)
                 print(e)
                 pass
+    ws.close()
 
 def main():  # main function
     if len(sys.argv) > 1:
@@ -159,6 +187,8 @@ def main():  # main function
             ticker()
         elif sys.argv[1] == '-log':
             trade_logger()
+        elif sys.argv[1] == '-raw':
+            raw_order_book()
         elif sys.argv[1] == '-orderbook':
             if len(sys.argv) > 2:
                 if sys.argv[2] in ('asks', 'bids'):
