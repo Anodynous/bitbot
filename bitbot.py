@@ -99,25 +99,30 @@ def order_book(ordertype, price_range=0):  # prints order book data
 
 
 def raw_order_book():
-    orderbook_length = 25
-    ws = bitfinexConnect('book', 'P3', orderbook_length) #number of decimal places: P0=2, P1=1, P2=0 ie. $1, P3=-1 ie. $10
+    orderbook_length = 100
+    precision = 'R0'
+    ws = bitfinexConnect('book', precision, orderbook_length) #number of decimal places: P0=2, P1=1, P2=0 ie. $1, P3=-1 ie. $10
     while True:
         result = ws.recv()
         result = json.loads(result)
         if type(result) == list:
-            if len(result) == 4 and result[2] != 0:
-                for n in range(0, orderbook_length*2):
+            if len(result) == 4 and result[1] != 'hb':
+                for n in range(0, len(order_book)-1):
                     if result[1] == order_book[n][0]:
                         if result[3] != order_book[n][2]:
-                            order_book[n] = [result[1], result[2], result[3]]
-                            print('MATCH: , [{0}, {1}, {2}] :: {3}'.format(result[1], result[2], result[3], order_book[n]))
+                            if result[2] != 0:
+                                print('UPDATE: , [{0}, {1}, {2}] :: {3}'.format(result[1], result[2], result[3], order_book[n]))
+                                order_book[n] = [result[1], result[2], result[3]]
+                                break
+                            else:
+                                del order_book[n]
+                                print('removed! book lenght now:', len(order_book))
+                        elif result[3] == order_book[n][2]:
                             break
-                        if result[3] == order_book[n][2]:
-                            break
-                        elif n == orderbook_length-1:
-                            new_bookpoint = [result[1], result[2], result[3]]
-                            order_book.append(new_bookpoint)
-                            print('ADDED: , [{0}, {1}, {2}] :: {3}'.format(result[1], result[2], result[3], order_book[n]))
+                    elif n >= (len(order_book)-2) and result[2] != 0:
+                        new_bookpoint = [result[1], result[2], result[3]]
+                        order_book.append(new_bookpoint)
+                        print('APPEND: , [{0}, {1}, {2}]'.format(result[1], result[2], result[3]))
             elif len(result) == 2 and result[1] != 'hb':
                 order_book = result[1]
                 order_book = sorted(order_book, key = itemgetter(0), reverse = True)
