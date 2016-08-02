@@ -6,15 +6,14 @@ import glob
 import requests
 import csv
 from datetime import datetime
-from websocket import create_connection
+from websocket import create_connection, WebSocketTimeoutException
 from operator import itemgetter
 
 if sys.version_info[0] < 3:
         raise "Requires Python 3+"
 
-
 def bitfinexConnect(channel, precission, orderbook=25):
-    ws = create_connection("wss://api2.bitfinex.com:3000/ws")
+    ws = create_connection("wss://api2.bitfinex.com:3000/ws", timeout=5)
     if orderbook == 0:
         ws.send(json.dumps({
             "event": "subscribe",
@@ -154,29 +153,33 @@ def trade_logger_filechk():  # picks logfile to continue from and gets linecount
 def trade_logger():  # logs all trades in CSV format
     last_logfile, trade_count = trade_logger_filechk()
     print(last_logfile, trade_count)
-    ws = bitfinexConnect('trades', 'P0')
+    ws = bitfinexConnect('trades', 'R0')
     while True:
-        result = ws.recv()
-        result = json.loads(result)
-        #if (type(result) == list) and (result[1] == 'hb'):
-        if (type(result) == list) and (result[1] == 'tu'):
-            try:
-                if result[1] == 'tu':
-                    if trade_count >= 5000:
-                        last_logfile = 'bitfinex_tradelog' + str(int(last_logfile[17:][:-4]) + 1) + '.csv'
-                        trade_count = 0
-                    trade_count += 1
+        try:
+            result = ws.recv()
+            result = json.loads(result)
+            #if (type(result) == list) and (result[1] == 'hb'):
+            if (type(result) == list) and (result[1] == 'tu'):
+                try:
+                    if result[1] == 'tu':
+                        if trade_count >= 100000: # splits CSV files after 100.000 trades
+                            last_logfile = 'bitfinex_tradelog' + str(int(last_logfile[17:][:-4]) + 1) + '.csv'
+                            trade_count = 0
+                        trade_count += 1
+                        log = open(last_logfile, 'a')
+                        writer = csv.writer(log, dialect='excel')
+                        writer.writerow(result)
+                        print('.', end='')
+                        sys.stdout.flush()
+                except Exception as e:
                     log = open(last_logfile, 'a')
                     writer = csv.writer(log, dialect='excel')
-                    writer.writerow(result)
-                    print('.', end='')
-                    sys.stdout.flush()
-            except Exception as e:
-                log = open(last_logfile, 'a')
-                writer = csv.writer(log, dialect='excel')
-                writer.writerow(e)
-                print(e)
-                pass
+                    writer.writerow(e)
+                    print(e)
+                    pass
+        except WebSocketTimeoutException as e:
+            print(e)
+            trade_logger()
     ws.close()
 
 def main():  # main function
