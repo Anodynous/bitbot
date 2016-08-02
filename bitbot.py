@@ -152,8 +152,12 @@ def trade_logger_filechk():  # picks logfile to continue from and gets linecount
 
 def trade_logger():  # logs all trades in CSV format
     last_logfile, trade_count = trade_logger_filechk()
-    print(last_logfile, trade_count)
     ws = bitfinexConnect('trades', 'R0')
+    log = open(last_logfile, 'a')
+    writer = csv.writer(log, dialect='excel')
+    timestamp = datetime.now()
+    writer.writerow(['','','','','','','','Logstart',timestamp])
+    print('Started logging at {0} to file {1} after row {2}'.format(timestamp, last_logfile, trade_count))
     while True:
         try:
             result = ws.recv()
