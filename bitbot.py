@@ -40,10 +40,22 @@ def trades(minsize):  # prints trades equal to or larger than 'minsize'
         try:
             if result[1] == 'te':
                 if abs(float(result[5])) > int(minsize):
-                    if float(result[5]) > 0:
-                        print('BUY: ' + str(result[5]) + ' @ ' + str(result[4]))
+                    if float(result[5]) > 3:
+                        print('\033[1;37;42mBUY: ' + str(result[5]) + ' @ ' + str(result[4]) + '\033[0;37;40m')
+                    elif float(result[5]) > 2:
+                        print('\033[1;37;42mBUY:\033[1;32;40m ' + str(result[5]) + ' @ ' + str(result[4]))
+                    elif float(result[5]) > 1:
+                        print('\033[1;32;40mBUY:' + str(result[5]) + ' @ ' + str(result[4]))
+                    elif float(result[5]) > 0:
+                        print('\033[0;32;40mBUY: ' + str(result[5]) + ' @ ' + str(result[4]))
+                    elif float(result[5]) < -3:
+                        print('\033[1;37;41mBUY: ' + str(result[5]) + ' @ ' + str(result[4]) + '\033[0;37;40m')
+                    elif float(result[5]) < -2:
+                        print('\033[1;37;41mSELL:\033[1;31;40m ' + str(result[5]) + ' @ ' + str(result[4]))
+                    elif float(result[5]) < -1:
+                        print('\033[1;31;40mSELL: ' + str(result[5]) + ' @ ' + str(result[4]))
                     elif float(result[5]) < 0:
-                        print('SELL: ' + str(result[5]) + ' @ ' + str(result[4]))
+                        print('\033[0;31;40mSELL: ' + str(result[5]) + ' @ ' + str(result[4]))
         except:
             continue
             # print(json.dumps(result, indent = 4, sort_keys = True))
