@@ -12,21 +12,21 @@ from operator import itemgetter
 if sys.version_info[0] < 3:
         raise "Requires Python 3+"
 
-def bitfinexConnect(channel, precission, orderbook=25):
+def bitfinexConnect(channel, precision, orderbook=25, coin_pair='BTCUSD'):
     ws = create_connection("wss://api2.bitfinex.com:3000/ws", timeout=5)
     if orderbook == 0:
         ws.send(json.dumps({
             "event": "subscribe",
             "channel": channel,
-            "pair": "BTCUSD",
-            "prec": precission
+            "pair": coin_pair,
+            "prec": precision
         }))
     elif orderbook != 0:
         ws.send(json.dumps({
             "event": "subscribe",
             "channel": channel,
-            "pair": "BTCUSD",
-            "prec": precission,
+            "pair": coin_pair,
+            "prec": precision,
             "len": orderbook
         }))
     return(ws)
@@ -40,25 +40,27 @@ def trades(minsize):  # prints trades equal to or larger than 'minsize'
         try:
             if result[1] == 'te':
                 if abs(float(result[5])) > int(minsize):
+                    result_timestamp = datetime.now().strftime("%H:%M:%S.%f")
                     if float(result[5]) > 30:
-                        print('\033[1;37;42mBUY: ' + str(result[5]) + ' @ ' + str(result[4]) + '\033[0;37;40m')
+                        print('\033[1;37;42mBUY:  {0} @ {1}\033[0;37;40m : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
                     elif float(result[5]) > 10:
-                        print('\033[1;37;42mBUY:\033[1;32;40m ' + str(result[5]) + ' @ ' + str(result[4]))
+                        print('\033[1;37;42mBUY:\033[1;32;40m  {0} @ {1} : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
                     elif float(result[5]) > 5:
-                        print('\033[1;32;40mBUY:' + str(result[5]) + ' @ ' + str(result[4]))
+                        print('\033[1;32;40mBUY:  {0} @ {1} : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
                     elif float(result[5]) > 0:
-                        print('\033[0;32;40mBUY: ' + str(result[5]) + ' @ ' + str(result[4]))
+                        print('\033[0;32;40mBUY:  {0} @ {1} : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
                     elif float(result[5]) < -30:
-                        print('\033[1;37;41mBUY: ' + str(result[5]) + ' @ ' + str(result[4]) + '\033[0;37;40m')
+                        print('\033[1;37;41mSELL: {0} @ {1}\033[0;37;40m : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
                     elif float(result[5]) < -10:
-                        print('\033[1;37;41mSELL:\033[1;31;40m ' + str(result[5]) + ' @ ' + str(result[4]))
+                        print('\033[1;37;41mSELL:\033[1;31;40m {0} @ {1} : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
                     elif float(result[5]) < -5:
-                        print('\033[1;31;40mSELL: ' + str(result[5]) + ' @ ' + str(result[4]))
+                        print('\033[1;31;40mSELL: {0} @ {1} : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
                     elif float(result[5]) < 0:
-                        print('\033[0;31;40mSELL: ' + str(result[5]) + ' @ ' + str(result[4]))
+                        print('\033[0;31;40mSELL: {0} @ {1} : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
         except:
+            print('EXCEPTION!')
+            print(json.dumps(result, indent = 4, sort_keys = True))
             continue
-            # print(json.dumps(result, indent = 4, sort_keys = True))
     ws.close()
 
 
@@ -201,7 +203,7 @@ def trade_logger():  # logs all trades in CSV format
 def main():  # main function
     if len(sys.argv) > 1:
         if sys.argv[1] == '-h':
-            print('HELP...')
+            print('options:\n-ticker\n-log\n-raw\n-orderbook (asks/bids)')
         elif sys.argv[1] == '-trades':
             try:
                 trades(sys.argv[2])
