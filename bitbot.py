@@ -39,7 +39,7 @@ def trades(minsize=0, coin_pair='BTCUSD'):  # prints trades equal to or larger t
         result = json.loads(result)
         try:
             if result[1] == 'te':
-                if abs(float(result[5])) > int(minsize):
+                if abs(float(result[5])) > float(minsize):
                     result_timestamp = datetime.now().strftime("%H:%M:%S.%f")
                     if float(result[5]) > 30:
                         print('\033[1;37;42mBUY:  {0} @ {1}\033[0;37;40m : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
