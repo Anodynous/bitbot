@@ -32,8 +32,8 @@ def bitfinexConnect(channel, precision, orderbook=25, coin_pair='BTCUSD'):
     return(ws)
 
 
-def trades(minsize):  # prints trades equal to or larger than 'minsize'
-    ws = bitfinexConnect('trades', 'P0')
+def trades(minsize=0, coin_pair='BTCUSD'):  # prints trades equal to or larger than 'minsize'
+    ws = bitfinexConnect('trades', 'P0', coin_pair=coin_pair)
     while True:
         result = ws.recv()
         result = json.loads(result)
@@ -58,7 +58,6 @@ def trades(minsize):  # prints trades equal to or larger than 'minsize'
                     elif float(result[5]) < 0:
                         print('\033[0;31;40mSELL: {0} @ {1} : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
         except:
-            print('EXCEPTION!')
             print(json.dumps(result, indent = 4, sort_keys = True))
             continue
     ws.close()
@@ -203,12 +202,18 @@ def trade_logger():  # logs all trades in CSV format
 def main():  # main function
     if len(sys.argv) > 1:
         if sys.argv[1] == '-h':
-            print('options:\n-ticker\n-log\n-raw\n-orderbook (asks/bids)')
+            print('options:\n-trades (coin_pair minsize)\n-ticker\n-log\n-raw\n-orderbook (asks/bids range)')
         elif sys.argv[1] == '-trades':
-            try:
-                trades(sys.argv[2])
-            except:
-                trades(0)
+            if len(sys.argv) > 2:
+                try:
+                    trades(sys.argv[3], sys.argv[2])
+                except:
+                    trades(coin_pair=sys.argv[2])
+            elif len(sys.argv) > 1:
+                try:
+                    trades(sys.argv[2])
+                except:
+                    trades()
         elif sys.argv[1] == '-ticker':
             ticker()
         elif sys.argv[1] == '-log':
