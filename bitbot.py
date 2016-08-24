@@ -48,7 +48,7 @@ def trades(minsize=0, coin_pair='BTCUSD'):  # prints trades equal to or larger t
                     elif float(result[5]) > 5:
                         print('\033[1;32;40mBUY:  {0} @ {1} : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
                     elif float(result[5]) > 0:
-                        print('\033[0;32;40mBUY:  {0} @ {1} : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
+                        print('\033[0;32;0mBUY:  {0} @ {1} : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
                     elif float(result[5]) < -30:
                         print('\033[1;37;41mSELL: {0} @ {1}\033[0;37;40m : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
                     elif float(result[5]) < -10:
@@ -56,7 +56,7 @@ def trades(minsize=0, coin_pair='BTCUSD'):  # prints trades equal to or larger t
                     elif float(result[5]) < -5:
                         print('\033[1;31;40mSELL: {0} @ {1} : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
                     elif float(result[5]) < 0:
-                        print('\033[0;31;40mSELL: {0} @ {1} : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
+                        print('\033[0;31;0mSELL: {0} @ {1} : {2}'.format(str(result[5]),str(result[4]), result_timestamp))
         except:
             print(json.dumps(result, indent = 4, sort_keys = True))
             continue
