@@ -1,12 +1,10 @@
-import sys
+import csv
 import glob
 import json
-import csv
-
+import sys
 from datetime import datetime
-from connect import bitfinexConnect
 
-
+from modules.connect import bitfinexConnect
 
 
 def trade_logger_filechk():  # picks logfile to continue from and gets linecount

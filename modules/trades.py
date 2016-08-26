@@ -1,5 +1,6 @@
 import json
-from connect import bitfinexConnect
+
+from modules.connect import bitfinexConnect
 
 
 def trades(minsize=0, coin_pair='BTCUSD'):  # prints trades equal to or larger than 'minsize'

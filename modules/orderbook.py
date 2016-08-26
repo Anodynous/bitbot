@@ -1,11 +1,11 @@
-import requests
-import json
 import sys
+import json
+import requests
 from datetime import datetime
 from operator import itemgetter
 
-from connect import bitfinexConnect
-from price import current_price
+from modules.connect import bitfinexConnect
+from modules.price import current_price
 
 
 def order_book(ordertype, price_range=0):  # prints order book data

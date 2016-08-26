@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import sys
 
-from trades import trades
-from orderbook import order_book
-from orderbook import raw_order_book
-from price import ticker
-from logger import trade_logger
+from modules.logger import trade_logger
+from modules.orderbook import order_book
+from modules.orderbook import raw_order_book
+from modules.trades import trades
+from modules.price import ticker
 
 
 if sys.version_info[0] < 3:

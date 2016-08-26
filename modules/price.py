@@ -1,6 +1,8 @@
-import requests
-from connect import bitfinexConnect
 import json
+
+import requests
+
+from modules.connect import bitfinexConnect
 
 
 def ticker():  # prints ticker feed
