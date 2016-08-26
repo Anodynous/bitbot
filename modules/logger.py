@@ -3,6 +3,7 @@ import glob
 import json
 import sys
 from datetime import datetime
+from websocket import WebSocketTimeoutException
 
 from modules.connect import bitfinexConnect
 
