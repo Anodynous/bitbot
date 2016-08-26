@@ -1,4 +1,4 @@
-from websocket import create_connection, WebSocketTimeoutException
+from websocket import create_connection
 import json
 
 
