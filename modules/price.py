@@ -3,9 +3,9 @@ import json
 import requests
 
 from modules.connect import bitfinexConnect
+from modules.output import output
 
-
-def ticker():  # prints ticker feed
+def ticker():  # outputs ticker feed
     last_price = 0
     ws = bitfinexConnect('ticker', 'P0')
     while True:
@@ -14,7 +14,7 @@ def ticker():  # prints ticker feed
         try:
             if result[2] != 'hb':
                 if last_price != result[7]:
-                    print(result[7])
+                    output(result[7])
                     last_price = result[7]
         except:
             continue

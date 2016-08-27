@@ -6,7 +6,7 @@ from datetime import datetime
 from websocket import WebSocketTimeoutException
 
 from modules.connect import bitfinexConnect
-
+from modules.output import output
 
 def trade_logger_filechk():  # picks logfile to continue from and gets linecount
     logfile = glob.glob('bitfinex_tradelog*')
@@ -38,7 +38,7 @@ def trade_logger():  # logs all trades in CSV format
     writer = csv.writer(log, dialect='excel')
     timestamp = datetime.now()
     writer.writerow(['','','','','','','','Logstart',timestamp])
-    print('Started logging at {0} to file {1} after row {2}'.format(timestamp, last_logfile, trade_count))
+    output('Started logging at {0} to file {1} after row {2}'.format(timestamp, last_logfile, trade_count))
     while True:
         try:
             result = ws.recv()
@@ -54,15 +54,15 @@ def trade_logger():  # logs all trades in CSV format
                         log = open(last_logfile, 'a')
                         writer = csv.writer(log, dialect='excel')
                         writer.writerow(result)
-                        print('.', end='')
+                        output('.', end='')
                         sys.stdout.flush()
                 except Exception as e:
                     log = open(last_logfile, 'a')
                     writer = csv.writer(log, dialect='excel')
                     writer.writerow(e)
-                    print(e)
+                    output(e)
                     pass
         except WebSocketTimeoutException as e:
-            print(e)
+            output(e)
             trade_logger()
     ws.close()
