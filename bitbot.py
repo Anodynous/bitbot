@@ -6,7 +6,7 @@ from modules.orderbook import order_book
 from modules.orderbook import raw_order_book
 from modules.trades import trades
 from modules.price import ticker
-
+from modules.output import output
 
 if sys.version_info[0] < 3:
         raise "Requires Python 3+"
@@ -15,7 +15,7 @@ if sys.version_info[0] < 3:
 def main():  # main function
     if len(sys.argv) > 1:
         if sys.argv[1] == '-h':
-            print('options:\n-trades (coin_pair minsize)\n-ticker\n-log\n-raw\n-orderbook (asks/bids range)')
+            output('options:\n-trades (coin_pair minsize)\n-ticker\n-log\n-raw\n-orderbook (asks/bids range)')
         elif sys.argv[1] == '-trades':
             if len(sys.argv) > 2:
                 try:
@@ -40,17 +40,17 @@ def main():  # main function
                         if 0 <= int(sys.argv[3]) <= 1000:
                             order_book(sys.argv[2], sys.argv[3])
                         else:
-                            print('check range attribute')
+                            output('check range attribute')
                     else:
                         order_book(sys.argv[2])
                 else:
-                    print("please define either 'asks' or 'bids'")
+                    output("please define either 'asks' or 'bids'")
             else:
-                print("please define either 'asks' or 'bids'")
+                output("please define either 'asks' or 'bids'")
         else:
-            print('check command line arguments')
+            output('check command line arguments')
     else:
-        print('no command line arguments provided')
+        output('no command line arguments provided')
 
 
 if __name__ == "__main__":  # calls main function
