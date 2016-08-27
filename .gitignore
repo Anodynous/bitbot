@@ -31,6 +31,6 @@ pip-delete-this-directory.txt
 nosetests.xml
 coverage.xml
 
-# Project relevant files
+# Project specific files
 *.csv
 *.config
