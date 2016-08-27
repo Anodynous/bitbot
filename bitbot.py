@@ -53,5 +53,8 @@ def main():  # main function
         output('no command line arguments provided')
 
 
-if __name__ == "__main__":  # calls main function
-    main()
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:   # cleaner exit without showing traceback
+        pass
