@@ -1,0 +1,1 @@
+#General interpreter for Bitstamp API
