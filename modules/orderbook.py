@@ -9,6 +9,7 @@ from modules.price import current_price
 from modules.output import output
 
 def order_book(ordertype, price_range=0):  # outputs order book data
+    ordertype = ordertype + 's'
     if price_range != 0:
         last_price = float(current_price())
     r = requests.get('https://api.bitfinex.com/v1/book/BTCUSD')
@@ -32,7 +33,7 @@ def order_book(ordertype, price_range=0):  # outputs order book data
         except:
             cumulative_usd = "{:,}".format(int(book_usd_value))
             cumulative_btc = "{:,}".format(int(book_btc_value))
-            output('\n\n{0} {1} {2}'.format((n + 1), ordertype[:-1], ' orders'))
+            output('\n\n{0} {1} {2}'.format((n), ordertype[:-1], ' orders'))
             output('Cumulative value of: {0} {1}'.format(cumulative_usd, 'USD'))
             output('Cumulative quantity of: {0} {1}'.format(cumulative_btc, 'BTC'))
             sys.exit(1)
