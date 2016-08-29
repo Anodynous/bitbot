@@ -33,6 +33,8 @@ def trades(minsize=0, coin_pair='BTCUSD'):  # outputs trades equal to or larger 
         except:
             if result['event'] == 'subscribed':
                 output('Subscribed to {0} at {1}'.format(result['pair'], datetime.now().strftime('%H:%M:%S')))
+                if minsize != 0:
+                    output('min tradesize displayed: {0}'.format(minsize))
             elif result['event'] != 'info':
                 output(result)
             continue
