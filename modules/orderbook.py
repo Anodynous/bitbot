@@ -9,7 +9,12 @@ from modules.price import current_price
 from modules.output import output
 
 def order_book(ordertype, price_range=0):  # outputs order book data
-    ordertype = ordertype + 's'
+    if ordertype == 'all':
+        print('Not yet supported')
+        sys.exit(1)
+    else:
+        ordertype = ordertype + 's'
+
     if price_range != 0:
         last_price = float(current_price())
     r = requests.get('https://api.bitfinex.com/v1/book/BTCUSD')
