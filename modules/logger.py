@@ -54,7 +54,7 @@ def trade_logger():  # logs all trades in CSV format
                         log = open(last_logfile, 'a')
                         writer = csv.writer(log, dialect='excel')
                         writer.writerow(result)
-                        output('.', end='')
+                        print('.', end='')
                         sys.stdout.flush()
                 except Exception as e:
                     log = open(last_logfile, 'a')
